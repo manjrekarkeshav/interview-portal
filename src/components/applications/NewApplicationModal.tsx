@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Modal } from '../common/Modal';
 import { useStore } from '../../store/useStore';
-import { Priority, AppStatus, Stage, H1BSponsorship, PRIORITIES, STAGES } from '../../lib/types';
+import { Priority, AppStatus, Stage, H1BSponsorship, CompanyType, Industry, PRIORITIES, STAGES, COMPANY_TYPES, INDUSTRIES } from '../../lib/types';
 
 interface Props {
   onClose: () => void;
@@ -21,6 +21,8 @@ export function NewApplicationModal({ onClose, onCreated, initialCompany }: Prop
     recruiter_contact: '',
     referral_source: '',
     h1b_sponsorship: 'Unknown' as H1BSponsorship,
+    company_type: null as CompanyType | null,
+    industry: null as Industry | null,
     notes: '',
   });
   const [loading, setLoading] = useState(false);
@@ -79,6 +81,20 @@ export function NewApplicationModal({ onClose, onCreated, initialCompany }: Prop
               <option>Unknown</option>
               <option>Confirmed</option>
               <option>Not Offered</option>
+            </select>
+          </div>
+          <div>
+            <label className={labelClass}>Company Type</label>
+            <select className={inputClass} value={form.company_type ?? ''} onChange={e => setForm(f => ({ ...f, company_type: (e.target.value || null) as CompanyType | null }))}>
+              <option value="">— Select —</option>
+              {COMPANY_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className={labelClass}>Industry</label>
+            <select className={inputClass} value={form.industry ?? ''} onChange={e => setForm(f => ({ ...f, industry: (e.target.value || null) as Industry | null }))}>
+              <option value="">— Select —</option>
+              {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
             </select>
           </div>
           <div className="col-span-2">

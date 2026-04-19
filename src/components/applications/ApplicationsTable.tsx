@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { ChevronUp, ChevronDown, MoreHorizontal, Ghost, ArrowRight, Plus, Trash2, Eye } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { useAuth } from '../../lib/auth';
-import { Application, Priority, AppStatus, Outcome, Stage, STAGES, PRIORITIES, STATUSES, OUTCOMES } from '../../lib/types';
+import { Application, Priority, AppStatus, Outcome, Stage, CompanyType, Industry, STAGES, PRIORITIES, STATUSES, OUTCOMES, COMPANY_TYPES, INDUSTRIES } from '../../lib/types';
 import { PriorityPill } from '../common/PriorityPill';
 import { OutcomePill, StatusPill } from '../common/StatusPill';
 import { formatRelativeDate, isStale, getStageIndex } from '../../lib/utils';
@@ -28,7 +28,7 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({ key: 'priority', dir: 'asc' });
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [showNew, setShowNew] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState<{ appId: string; field: 'status' | 'outcome' | 'stage' } | null>(null);
+  const [openDropdown, setOpenDropdown] = useState<{ appId: string; field: 'status' | 'outcome' | 'stage' | 'company_type' | 'industry' } | null>(null);
   const [editingRole, setEditingRole] = useState<{ appId: string; value: string } | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const roleInputRef = useRef<HTMLInputElement>(null);
@@ -130,10 +130,10 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
   };
 
   const SortIcon = ({ col }: { col: SortKey }) =>
-    sort.key === col ? (sort.dir === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />) : null;
+    sort.key === col ? (sort.dir === 'asc' ? <ChevronUp size={10} /> : <ChevronDown size={10} />) : null;
 
-  const thClass = `text-left text-xs font-medium cursor-pointer select-none px-3 py-2 ${darkMode ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'}`;
-  const tdClass = `px-3 py-2.5 text-sm`;
+  const thClass = `text-left text-xs font-medium cursor-pointer select-none px-2 py-2 whitespace-nowrap ${darkMode ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'}`;
+  const tdClass = `px-2 py-1.5 text-xs`;
 
   const toggleMulti = <T extends string>(arr: T[], val: T, setter: (v: T[]) => void) => {
     setter(arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]);
@@ -143,7 +143,7 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
     appId, field, options, currentVal, renderCurrent, renderOption,
   }: {
     appId: string;
-    field: 'status' | 'outcome' | 'stage';
+    field: 'status' | 'outcome' | 'stage' | 'company_type' | 'industry';
     options: string[];
     currentVal: string | null | undefined;
     renderCurrent: () => React.ReactNode;
@@ -171,6 +171,8 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
                   if (field === 'status') updateApplication(appId, { status: opt as AppStatus });
                   else if (field === 'outcome') updateApplication(appId, { outcome: opt === '— Clear —' ? null : opt as Outcome });
                   else if (field === 'stage') updateApplication(appId, { current_stage: opt as Stage });
+                  else if (field === 'company_type') updateApplication(appId, { company_type: opt === '— Clear —' ? null : opt as CompanyType });
+                  else if (field === 'industry') updateApplication(appId, { industry: opt === '— Clear —' ? null : opt as Industry });
                   setOpenDropdown(null);
                 }}
                 className={`w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 transition-colors ${
@@ -199,6 +201,8 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
       {val}
     </button>
   );
+
+  const emptyVal = <span className={`text-xs ${darkMode ? 'text-gray-600' : 'text-gray-300'}`}>—</span>;
 
   return (
     <div>
@@ -238,194 +242,263 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
       )}
 
       <div className={`rounded-xl border overflow-hidden ${darkMode ? 'border-gray-800' : 'border-gray-200'}`}>
-        <table className="w-full">
-          <thead>
-            <tr className={`border-b ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-gray-50 border-gray-100'}`}>
-              <th className={thClass} onClick={() => toggleSort('priority')}>Priority <SortIcon col="priority" /></th>
-              <th className={thClass} onClick={() => toggleSort('company')}>Company <SortIcon col="company" /></th>
-              <th className={`${thClass} hidden md:table-cell`}>Role</th>
-              <th className={`${thClass} hidden lg:table-cell`} onClick={() => toggleSort('current_stage')}>Stage <SortIcon col="current_stage" /></th>
-              <th className={thClass} onClick={() => toggleSort('status')}>Status <SortIcon col="status" /></th>
-              <th className={thClass} onClick={() => toggleSort('outcome')}>Outcome <SortIcon col="outcome" /></th>
-              <th className={thClass} onClick={() => toggleSort('updated_at')}>Last Activity <SortIcon col="updated_at" /></th>
-              <th className={`${thClass} hidden xl:table-cell`}>Next Event</th>
-              <th className={`${thClass} hidden lg:table-cell`}>Recruiter</th>
-              <th className={thClass} />
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.length === 0 ? (
-              <tr>
-                <td colSpan={10} className={`text-center py-12 text-sm ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>
-                  No applications found
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className={`border-b ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-gray-50 border-gray-100'}`}>
+                <th className={thClass} onClick={() => toggleSort('priority')}>
+                  <span className="flex items-center gap-0.5">Pri <SortIcon col="priority" /></span>
+                </th>
+                <th className={thClass} onClick={() => toggleSort('company')}>
+                  <span className="flex items-center gap-0.5">Company <SortIcon col="company" /></span>
+                </th>
+                <th className={`${thClass} hidden md:table-cell`}>Role</th>
+                <th className={`${thClass} hidden xl:table-cell`}>Co. Type</th>
+                <th className={`${thClass} hidden xl:table-cell`}>Industry</th>
+                <th className={`${thClass} hidden lg:table-cell`} onClick={() => toggleSort('current_stage')}>
+                  <span className="flex items-center gap-0.5">Stage <SortIcon col="current_stage" /></span>
+                </th>
+                <th className={thClass} onClick={() => toggleSort('status')}>
+                  <span className="flex items-center gap-0.5">Status <SortIcon col="status" /></span>
+                </th>
+                <th className={thClass} onClick={() => toggleSort('outcome')}>
+                  <span className="flex items-center gap-0.5">Outcome <SortIcon col="outcome" /></span>
+                </th>
+                <th className={thClass} onClick={() => toggleSort('updated_at')}>
+                  <span className="flex items-center gap-0.5">Last Act. <SortIcon col="updated_at" /></span>
+                </th>
+                <th className={`${thClass} hidden xl:table-cell`}>Next Event</th>
+                <th className={`${thClass} hidden lg:table-cell`}>Recruiter</th>
+                <th className={thClass} />
               </tr>
-            ) : (
-              filtered.map((app) => {
-                const lastActivity = getLastActivity(app);
-                const nextEvent = getNextEvent(app);
-                const stale = isStale(lastActivity) && app.status === 'Active';
+            </thead>
+            <tbody>
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={12} className={`text-center py-12 text-sm ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>
+                    No applications found
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((app) => {
+                  const lastActivity = getLastActivity(app);
+                  const nextEvent = getNextEvent(app);
+                  const stale = isStale(lastActivity) && app.status === 'Active';
 
-                return (
-                  <tr
-                    key={app.id}
-                    className={`border-b cursor-pointer transition-colors ${
-                      darkMode
-                        ? 'border-gray-800 hover:bg-gray-800/50'
-                        : 'border-gray-100 hover:bg-gray-50'
-                    }`}
-                    onClick={() => setView('detail', app.id)}
-                  >
-                    <td className={tdClass}>
-                      <PriorityPill priority={app.priority} onClick={isAdmin ? (e: React.MouseEvent) => {
-                        e.stopPropagation();
-                        const idx = PRIORITIES.indexOf(app.priority);
-                        const next = PRIORITIES[(idx + 1) % PRIORITIES.length];
-                        updateApplication(app.id, { priority: next });
-                      } : undefined} />
-                    </td>
-                    <td className={tdClass}>
-                      <span className={`font-medium text-sm ${darkMode ? 'text-white' : 'text-gray-900'}`}>{app.company}</span>
-                      {app.referral_source && (
-                        <span className={`ml-1.5 text-xs ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>↑{app.referral_source.split(' ')[0]}</span>
-                      )}
-                    </td>
-                    <td className={`${tdClass} hidden md:table-cell`} onClick={e => e.stopPropagation()}>
-                      {isAdmin && editingRole?.appId === app.id ? (
-                        <input
-                          ref={roleInputRef}
-                          value={editingRole.value}
-                          onChange={e => setEditingRole({ appId: app.id, value: e.target.value })}
-                          onBlur={commitRoleEdit}
-                          onKeyDown={e => {
-                            if (e.key === 'Enter') commitRoleEdit();
-                            if (e.key === 'Escape') setEditingRole(null);
-                          }}
-                          className={`w-full text-sm rounded px-1.5 py-0.5 outline-none border ${
-                            darkMode
-                              ? 'bg-gray-800 border-blue-500 text-white'
-                              : 'bg-white border-blue-400 text-gray-900'
-                          }`}
-                        />
-                      ) : (
-                        <span
-                          onClick={isAdmin ? () => setEditingRole({ appId: app.id, value: app.role }) : undefined}
-                          className={`text-sm ${isAdmin ? 'cursor-text hover:underline decoration-dashed underline-offset-2' : ''} ${darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}
-                        >
-                          {app.role}
-                        </span>
-                      )}
-                    </td>
-                    <td className={`${tdClass} hidden lg:table-cell`}>
-                      {isAdmin ? (
-                        <InlineDropdown
-                          appId={app.id}
-                          field="stage"
-                          options={STAGES}
-                          currentVal={app.current_stage}
-                          renderCurrent={() => (
-                            <span className={`text-xs font-mono hover:underline decoration-dashed underline-offset-2 ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}>
-                              {app.current_stage}
-                              <span className={`ml-1.5 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>{getStageIndex(app.current_stage) + 1}/{STAGES.length}</span>
-                            </span>
-                          )}
-                          renderOption={(opt) => (
-                            <span className="font-mono">{opt}</span>
-                          )}
-                        />
-                      ) : (
-                        <span className={`text-xs font-mono ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          {app.current_stage}
-                          <span className={`ml-1.5 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>{getStageIndex(app.current_stage) + 1}/{STAGES.length}</span>
-                        </span>
-                      )}
-                    </td>
-                    <td className={tdClass}>
-                      {isAdmin ? (
-                        <InlineDropdown
-                          appId={app.id}
-                          field="status"
-                          options={STATUSES}
-                          currentVal={app.status}
-                          renderCurrent={() => <StatusPill status={app.status} />}
-                          renderOption={(opt) => <StatusPill status={opt as AppStatus} />}
-                        />
-                      ) : (
-                        <StatusPill status={app.status} />
-                      )}
-                    </td>
-                    <td className={tdClass}>
-                      {isAdmin ? (
-                        <InlineDropdown
-                          appId={app.id}
-                          field="outcome"
-                          options={['— Clear —', ...OUTCOMES]}
-                          currentVal={app.outcome}
-                          renderCurrent={() => app.outcome
-                            ? <OutcomePill outcome={app.outcome} />
-                            : <span className={`text-xs ${darkMode ? 'text-gray-600 hover:text-gray-400' : 'text-gray-300 hover:text-gray-500'}`}>—</span>
-                          }
-                          renderOption={(opt) => opt === '— Clear —'
-                            ? <span className={`text-xs italic ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>{opt}</span>
-                            : <OutcomePill outcome={opt as Outcome} />
-                          }
-                        />
-                      ) : (
-                        app.outcome ? <OutcomePill outcome={app.outcome} /> : <span className={`text-xs ${darkMode ? 'text-gray-600' : 'text-gray-300'}`}>—</span>
-                      )}
-                    </td>
-                    <td className={`${tdClass} font-mono text-xs`}>
-                      <span className={stale ? 'text-red-400' : darkMode ? 'text-gray-500' : 'text-gray-500'}>
-                        {formatRelativeDate(lastActivity)}
-                      </span>
-                    </td>
-                    <td className={`${tdClass} hidden xl:table-cell text-xs font-mono`}>
-                      {nextEvent ? (
-                        <span className="text-blue-400">{nextEvent.date} · {nextEvent.stage}</span>
-                      ) : (
-                        <span className={darkMode ? 'text-gray-700' : 'text-gray-300'}>—</span>
-                      )}
-                    </td>
-                    <td className={`${tdClass} hidden lg:table-cell text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
-                      {app.recruiter_name || '—'}
-                    </td>
-                    <td className={tdClass} onClick={e => e.stopPropagation()}>
-                      <div className="relative">
-                        <button
-                          onClick={() => setOpenMenu(openMenu === app.id ? null : app.id)}
-                          className={`p-1 rounded transition-colors ${darkMode ? 'hover:bg-gray-700 text-gray-500' : 'hover:bg-gray-100 text-gray-400'}`}
-                        >
-                          <MoreHorizontal size={14} />
-                        </button>
-                        {openMenu === app.id && (
-                          <div className={`absolute right-0 top-7 z-10 rounded-lg shadow-xl border py-1 w-44 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-                            <button onClick={() => { setView('detail', app.id); setOpenMenu(null); }} className={`w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 ${darkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-50 text-gray-700'}`}>
-                              <Eye size={12} /> View Details
-                            </button>
-                            {isAdmin && (
-                              <>
-                                <button onClick={() => { advanceStage(app.id); setOpenMenu(null); }} className={`w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 ${darkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-50 text-gray-700'}`}>
-                                  <ArrowRight size={12} /> Advance Stage
-                                </button>
-                                <button onClick={() => { markGhosted(app.id); setOpenMenu(null); }} className={`w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 ${darkMode ? 'hover:bg-gray-700 text-purple-400' : 'hover:bg-gray-50 text-purple-600'}`}>
-                                  <Ghost size={12} /> Mark Ghosted
-                                </button>
-                                <div className={`my-1 border-t ${darkMode ? 'border-gray-700' : 'border-gray-100'}`} />
-                                <button onClick={() => { deleteApplication(app.id); setOpenMenu(null); }} className={`w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 ${darkMode ? 'hover:bg-gray-700 text-red-400' : 'hover:bg-gray-50 text-red-500'}`}>
-                                  <Trash2 size={12} /> Delete
-                                </button>
-                              </>
-                            )}
-                          </div>
+                  return (
+                    <tr
+                      key={app.id}
+                      className={`border-b cursor-pointer transition-colors ${
+                        darkMode
+                          ? 'border-gray-800 hover:bg-gray-800/50'
+                          : 'border-gray-100 hover:bg-gray-50'
+                      }`}
+                      onClick={() => setView('detail', app.id)}
+                    >
+                      <td className={tdClass}>
+                        <PriorityPill priority={app.priority} onClick={isAdmin ? (e: React.MouseEvent) => {
+                          e.stopPropagation();
+                          const idx = PRIORITIES.indexOf(app.priority);
+                          const next = PRIORITIES[(idx + 1) % PRIORITIES.length];
+                          updateApplication(app.id, { priority: next });
+                        } : undefined} />
+                      </td>
+                      <td className={tdClass}>
+                        <span className={`font-medium text-xs ${darkMode ? 'text-white' : 'text-gray-900'}`}>{app.company}</span>
+                        {app.referral_source && (
+                          <span className={`ml-1 text-xs ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>↑{app.referral_source.split(' ')[0]}</span>
                         )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+                      </td>
+                      <td className={`${tdClass} hidden md:table-cell`} onClick={e => e.stopPropagation()}>
+                        {isAdmin && editingRole?.appId === app.id ? (
+                          <input
+                            ref={roleInputRef}
+                            value={editingRole.value}
+                            onChange={e => setEditingRole({ appId: app.id, value: e.target.value })}
+                            onBlur={commitRoleEdit}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') commitRoleEdit();
+                              if (e.key === 'Escape') setEditingRole(null);
+                            }}
+                            className={`w-full text-xs rounded px-1.5 py-0.5 outline-none border ${
+                              darkMode
+                                ? 'bg-gray-800 border-blue-500 text-white'
+                                : 'bg-white border-blue-400 text-gray-900'
+                            }`}
+                          />
+                        ) : (
+                          <span
+                            onClick={isAdmin ? () => setEditingRole({ appId: app.id, value: app.role }) : undefined}
+                            className={`text-xs ${isAdmin ? 'cursor-text hover:underline decoration-dashed underline-offset-2' : ''} ${darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}
+                          >
+                            {app.role}
+                          </span>
+                        )}
+                      </td>
+
+                      <td className={`${tdClass} hidden xl:table-cell`} onClick={e => e.stopPropagation()}>
+                        {isAdmin ? (
+                          <InlineDropdown
+                            appId={app.id}
+                            field="company_type"
+                            options={['— Clear —', ...COMPANY_TYPES]}
+                            currentVal={app.company_type}
+                            renderCurrent={() => app.company_type ? (
+                              <span className={`text-xs hover:underline decoration-dashed underline-offset-2 ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}>
+                                {app.company_type}
+                              </span>
+                            ) : (
+                              <span className={`text-xs ${darkMode ? 'text-gray-600 hover:text-gray-400' : 'text-gray-300 hover:text-gray-500'}`}>—</span>
+                            )}
+                            renderOption={(opt) => opt === '— Clear —'
+                              ? <span className={`text-xs italic ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>{opt}</span>
+                              : <span className="text-xs">{opt}</span>
+                            }
+                          />
+                        ) : (
+                          app.company_type
+                            ? <span className={`text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{app.company_type}</span>
+                            : emptyVal
+                        )}
+                      </td>
+
+                      <td className={`${tdClass} hidden xl:table-cell`} onClick={e => e.stopPropagation()}>
+                        {isAdmin ? (
+                          <InlineDropdown
+                            appId={app.id}
+                            field="industry"
+                            options={['— Clear —', ...INDUSTRIES]}
+                            currentVal={app.industry}
+                            renderCurrent={() => app.industry ? (
+                              <span className={`text-xs hover:underline decoration-dashed underline-offset-2 ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}>
+                                {app.industry}
+                              </span>
+                            ) : (
+                              <span className={`text-xs ${darkMode ? 'text-gray-600 hover:text-gray-400' : 'text-gray-300 hover:text-gray-500'}`}>—</span>
+                            )}
+                            renderOption={(opt) => opt === '— Clear —'
+                              ? <span className={`text-xs italic ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>{opt}</span>
+                              : <span className="text-xs">{opt}</span>
+                            }
+                          />
+                        ) : (
+                          app.industry
+                            ? <span className={`text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{app.industry}</span>
+                            : emptyVal
+                        )}
+                      </td>
+
+                      <td className={`${tdClass} hidden lg:table-cell`}>
+                        {isAdmin ? (
+                          <InlineDropdown
+                            appId={app.id}
+                            field="stage"
+                            options={STAGES}
+                            currentVal={app.current_stage}
+                            renderCurrent={() => (
+                              <span className={`text-xs font-mono hover:underline decoration-dashed underline-offset-2 ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}>
+                                {app.current_stage}
+                                <span className={`ml-1 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>{getStageIndex(app.current_stage) + 1}/{STAGES.length}</span>
+                              </span>
+                            )}
+                            renderOption={(opt) => (
+                              <span className="font-mono text-xs">{opt}</span>
+                            )}
+                          />
+                        ) : (
+                          <span className={`text-xs font-mono ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                            {app.current_stage}
+                            <span className={`ml-1 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>{getStageIndex(app.current_stage) + 1}/{STAGES.length}</span>
+                          </span>
+                        )}
+                      </td>
+                      <td className={tdClass}>
+                        {isAdmin ? (
+                          <InlineDropdown
+                            appId={app.id}
+                            field="status"
+                            options={STATUSES}
+                            currentVal={app.status}
+                            renderCurrent={() => <StatusPill status={app.status} />}
+                            renderOption={(opt) => <StatusPill status={opt as AppStatus} />}
+                          />
+                        ) : (
+                          <StatusPill status={app.status} />
+                        )}
+                      </td>
+                      <td className={tdClass}>
+                        {isAdmin ? (
+                          <InlineDropdown
+                            appId={app.id}
+                            field="outcome"
+                            options={['— Clear —', ...OUTCOMES]}
+                            currentVal={app.outcome}
+                            renderCurrent={() => app.outcome
+                              ? <OutcomePill outcome={app.outcome} />
+                              : <span className={`text-xs ${darkMode ? 'text-gray-600 hover:text-gray-400' : 'text-gray-300 hover:text-gray-500'}`}>—</span>
+                            }
+                            renderOption={(opt) => opt === '— Clear —'
+                              ? <span className={`text-xs italic ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>{opt}</span>
+                              : <OutcomePill outcome={opt as Outcome} />
+                            }
+                          />
+                        ) : (
+                          app.outcome ? <OutcomePill outcome={app.outcome} /> : emptyVal
+                        )}
+                      </td>
+                      <td className={`${tdClass} font-mono`}>
+                        <span className={stale ? 'text-red-400' : darkMode ? 'text-gray-500' : 'text-gray-500'}>
+                          {formatRelativeDate(lastActivity)}
+                        </span>
+                      </td>
+                      <td className={`${tdClass} hidden xl:table-cell font-mono`}>
+                        {nextEvent ? (
+                          <span className="text-blue-400">{nextEvent.date} · {nextEvent.stage}</span>
+                        ) : (
+                          emptyVal
+                        )}
+                      </td>
+                      <td className={`${tdClass} hidden lg:table-cell ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                        {app.recruiter_name || '—'}
+                      </td>
+                      <td className={tdClass} onClick={e => e.stopPropagation()}>
+                        <div className="relative">
+                          <button
+                            onClick={() => setOpenMenu(openMenu === app.id ? null : app.id)}
+                            className={`p-1 rounded transition-colors ${darkMode ? 'hover:bg-gray-700 text-gray-500' : 'hover:bg-gray-100 text-gray-400'}`}
+                          >
+                            <MoreHorizontal size={12} />
+                          </button>
+                          {openMenu === app.id && (
+                            <div className={`absolute right-0 top-7 z-10 rounded-lg shadow-xl border py-1 w-44 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+                              <button onClick={() => { setView('detail', app.id); setOpenMenu(null); }} className={`w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 ${darkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-50 text-gray-700'}`}>
+                                <Eye size={12} /> View Details
+                              </button>
+                              {isAdmin && (
+                                <>
+                                  <button onClick={() => { advanceStage(app.id); setOpenMenu(null); }} className={`w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 ${darkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-50 text-gray-700'}`}>
+                                    <ArrowRight size={12} /> Advance Stage
+                                  </button>
+                                  <button onClick={() => { markGhosted(app.id); setOpenMenu(null); }} className={`w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 ${darkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-50 text-gray-600'}`}>
+                                    <Ghost size={12} /> Mark Ghosted
+                                  </button>
+                                  <div className={`my-1 border-t ${darkMode ? 'border-gray-700' : 'border-gray-100'}`} />
+                                  <button onClick={() => { deleteApplication(app.id); setOpenMenu(null); }} className={`w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 ${darkMode ? 'hover:bg-gray-700 text-red-400' : 'hover:bg-gray-50 text-red-500'}`}>
+                                    <Trash2 size={12} /> Delete
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div className={`mt-2 text-xs ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Upload, Activity } from 'lucide-react';
+import { Plus, Upload, Activity, Clock, CalendarClock } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { PipelineFunnel } from './PipelineFunnel';
 import { UpcomingEvents } from './UpcomingEvents';
@@ -15,6 +15,8 @@ export function Dashboard() {
   const [importing, setImporting] = useState(false);
 
   const activeCount = applications.filter(a => a.status !== 'Closed').length;
+  const pendingResponseCount = applications.filter(a => a.status === 'Pending Response').length;
+  const interviewsScheduledCount = applications.filter(a => a.outcome === 'Scheduled').length;
 
   const handleCSVImport = () => {
     const input = document.createElement('input');
@@ -70,13 +72,31 @@ export function Dashboard() {
 
       <div className="grid grid-cols-3 gap-4">
         <div className="col-span-2 space-y-4">
-          <div className={`rounded-xl p-4 border flex items-center justify-between ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
-            <div>
-              <p className={`text-xs font-medium mb-1 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>Active Pipeline</p>
-              <p className={`text-2xl font-bold font-mono ${darkMode ? 'text-white' : 'text-gray-900'}`}>{activeCount}</p>
-              <p className={`text-xs mt-0.5 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>applications in flight</p>
+          <div className="grid grid-cols-3 gap-3">
+            <div className={`rounded-xl p-4 border flex items-center justify-between ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
+              <div>
+                <p className={`text-xs font-medium mb-1 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>Active Pipeline</p>
+                <p className={`text-2xl font-bold font-mono ${darkMode ? 'text-white' : 'text-gray-900'}`}>{activeCount}</p>
+                <p className={`text-xs mt-0.5 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>in flight</p>
+              </div>
+              <Activity size={18} className="text-blue-400 shrink-0" />
             </div>
-            <Activity size={20} className="text-blue-400 shrink-0" />
+            <div className={`rounded-xl p-4 border flex items-center justify-between ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
+              <div>
+                <p className={`text-xs font-medium mb-1 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>Pending Response</p>
+                <p className={`text-2xl font-bold font-mono ${darkMode ? 'text-white' : 'text-gray-900'}`}>{pendingResponseCount}</p>
+                <p className={`text-xs mt-0.5 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>awaiting reply</p>
+              </div>
+              <Clock size={18} className="text-amber-400 shrink-0" />
+            </div>
+            <div className={`rounded-xl p-4 border flex items-center justify-between ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
+              <div>
+                <p className={`text-xs font-medium mb-1 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>Interviews Scheduled</p>
+                <p className={`text-2xl font-bold font-mono ${darkMode ? 'text-white' : 'text-gray-900'}`}>{interviewsScheduledCount}</p>
+                <p className={`text-xs mt-0.5 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>upcoming</p>
+              </div>
+              <CalendarClock size={18} className="text-emerald-400 shrink-0" />
+            </div>
           </div>
           <PipelineFunnel onStageClick={(s) => setStageFilter(s)} />
         </div>

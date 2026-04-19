@@ -1,5 +1,7 @@
 export type Priority = 'P0' | 'P0.5' | 'P1' | 'P2';
 export type AppStatus = 'Not Started' | 'Active' | 'Pending Response' | 'Closed';
+export type CompanyType = 'Series A' | 'Series B' | 'Series C' | 'Series D' | 'Series E' | 'Pre-IPO' | 'Public';
+export type Industry = 'Bank' | 'FinTech' | 'Tech' | 'Health Tech' | 'SaaS';
 export type Outcome = 'Scheduled' | 'Complete' | 'Ghosted' | 'Reject' | 'Role Closed' | 'Withdrew';
 export type Stage =
   | 'Recruiter Outreach'
@@ -29,6 +31,8 @@ export const PRIORITIES: Priority[] = ['P0', 'P0.5', 'P1', 'P2'];
 export const STATUSES: AppStatus[] = ['Not Started', 'Active', 'Pending Response', 'Closed'];
 export const OUTCOMES: Outcome[] = ['Scheduled', 'Complete', 'Ghosted', 'Reject', 'Role Closed', 'Withdrew'];
 export const EVENT_TYPES: EventType[] = ['Scheduled', 'Completed', 'Rejected', 'Ghosted', 'Withdrew', 'Outreach', 'Note'];
+export const COMPANY_TYPES: CompanyType[] = ['Series A', 'Series B', 'Series C', 'Series D', 'Series E', 'Pre-IPO', 'Public'];
+export const INDUSTRIES: Industry[] = ['Bank', 'FinTech', 'Tech', 'Health Tech', 'SaaS'];
 
 export interface Application {
   id: string;
@@ -42,6 +46,8 @@ export interface Application {
   recruiter_contact: string;
   referral_source: string;
   h1b_sponsorship: H1BSponsorship;
+  company_type: CompanyType | null;
+  industry: Industry | null;
   notes: string;
   created_at: string;
   updated_at: string;
