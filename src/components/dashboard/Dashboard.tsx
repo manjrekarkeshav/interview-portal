@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Plus, Upload } from 'lucide-react';
+import { Plus, Upload, Activity } from 'lucide-react';
 import { useStore } from '../../store/useStore';
-import { StatCards } from './StatCards';
 import { PipelineFunnel } from './PipelineFunnel';
 import { UpcomingEvents } from './UpcomingEvents';
 import { NewApplicationModal } from '../applications/NewApplicationModal';
@@ -10,10 +9,12 @@ import { Stage } from '../../lib/types';
 import { parseCSV } from '../../lib/csvImport';
 
 export function Dashboard() {
-  const { darkMode, importApplications, setView } = useStore();
+  const { darkMode, importApplications, setView, applications } = useStore();
   const [showNew, setShowNew] = useState(false);
   const [stageFilter, setStageFilter] = useState<Stage | null>(null);
   const [importing, setImporting] = useState(false);
+
+  const activeCount = applications.filter(a => a.status !== 'Closed').length;
 
   const handleCSVImport = () => {
     const input = document.createElement('input');
@@ -67,10 +68,16 @@ export function Dashboard() {
         </div>
       </div>
 
-      <StatCards />
-
       <div className="grid grid-cols-3 gap-4">
-        <div className="col-span-2">
+        <div className="col-span-2 space-y-4">
+          <div className={`rounded-xl p-4 border flex items-center justify-between ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
+            <div>
+              <p className={`text-xs font-medium mb-1 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>Active Pipeline</p>
+              <p className={`text-2xl font-bold font-mono ${darkMode ? 'text-white' : 'text-gray-900'}`}>{activeCount}</p>
+              <p className={`text-xs mt-0.5 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>applications in flight</p>
+            </div>
+            <Activity size={20} className="text-blue-400 shrink-0" />
+          </div>
           <PipelineFunnel onStageClick={(s) => setStageFilter(s)} />
         </div>
         <UpcomingEvents />
