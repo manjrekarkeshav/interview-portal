@@ -63,6 +63,7 @@ export interface Compensation {
   base: number;
   bonus: number;
   annual_equity: number;
+  total_equity: number;
   notes: string;
   created_at: string;
   updated_at: string;
@@ -98,4 +99,4 @@ export interface Referral {
   updated_at: string;
 }
 
-export type View = 'dashboard' | 'applications' | 'analytics' | 'referrals' | 'detail';
+export type View = 'dashboard' | 'applications' | 'analytics' | 'referrals' | 'detail' | 'compensation';

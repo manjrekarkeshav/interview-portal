@@ -6,6 +6,7 @@ import { ApplicationsScreen } from './components/applications/ApplicationsScreen
 import { ApplicationDetail } from './components/detail/ApplicationDetail';
 import { Analytics } from './components/analytics/Analytics';
 import { Referrals } from './components/referrals/Referrals';
+import { CompensationScreen } from './components/compensation/CompensationScreen';
 import { CommandPalette } from './components/common/CommandPalette';
 
 export default function App() {
@@ -42,6 +43,7 @@ export default function App() {
               {view === 'detail' && selectedAppId && <ApplicationDetail appId={selectedAppId} />}
               {view === 'analytics' && <Analytics />}
               {view === 'referrals' && <Referrals />}
+              {view === 'compensation' && <CompensationScreen />}
             </>
           )}
         </div>

@@ -16,13 +16,14 @@ export function CompensationTab({ app }: Props) {
     base: comp?.base ?? 0,
     bonus: comp?.bonus ?? 0,
     annual_equity: comp?.annual_equity ?? 0,
+    total_equity: comp?.total_equity ?? 0,
     notes: comp?.notes ?? '',
   });
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     const c = compensations.find(c => c.application_id === app.id);
-    if (c) setForm({ base: c.base, bonus: c.bonus, annual_equity: c.annual_equity, notes: c.notes });
+    if (c) setForm({ base: c.base, bonus: c.bonus, annual_equity: c.annual_equity, total_equity: c.total_equity ?? 0, notes: c.notes });
   }, [compensations, app.id]);
 
   const total = form.base + form.bonus + form.annual_equity;
@@ -63,7 +64,7 @@ export function CompensationTab({ app }: Props) {
         )}
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         <div>
           <label className={labelClass}>Base Salary</label>
           <input
@@ -92,6 +93,16 @@ export function CompensationTab({ app }: Props) {
             placeholder="50000"
             value={form.annual_equity || ''}
             onChange={e => setForm(f => ({ ...f, annual_equity: Number(e.target.value) || 0 }))}
+          />
+        </div>
+        <div>
+          <label className={labelClass}>Total Equity Grant</label>
+          <input
+            type="number"
+            className={inputClass}
+            placeholder="200000"
+            value={form.total_equity || ''}
+            onChange={e => setForm(f => ({ ...f, total_equity: Number(e.target.value) || 0 }))}
           />
         </div>
       </div>
