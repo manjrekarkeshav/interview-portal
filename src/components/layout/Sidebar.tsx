@@ -1,4 +1,4 @@
-import { LayoutDashboard, Table2, BarChart3, Users, Sun, Moon, Download, Upload, DollarSign } from 'lucide-react';
+import { LayoutDashboard, Table2, Users, Sun, Moon, Download, Upload, DollarSign } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { View } from '../../lib/types';
 
@@ -6,8 +6,7 @@ const navItems: { icon: React.ElementType; label: string; view: View }[] = [
   { icon: LayoutDashboard, label: 'Dashboard', view: 'dashboard' },
   { icon: Table2, label: 'Applications', view: 'applications' },
   { icon: DollarSign, label: 'Compensation', view: 'compensation' },
-  { icon: BarChart3, label: 'Analytics', view: 'analytics' },
-  { icon: Users, label: 'Referrals', view: 'referrals' },
+{ icon: Users, label: 'Referrals', view: 'referrals' },
 ];
 
 export function Sidebar() {

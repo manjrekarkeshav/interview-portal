@@ -99,4 +99,4 @@ export interface Referral {
   updated_at: string;
 }
 
-export type View = 'dashboard' | 'applications' | 'analytics' | 'referrals' | 'detail' | 'compensation';
+export type View = 'dashboard' | 'applications' | 'referrals' | 'detail' | 'compensation';
