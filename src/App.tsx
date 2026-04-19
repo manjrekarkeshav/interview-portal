@@ -8,6 +8,7 @@ import { ApplicationDetail } from './components/detail/ApplicationDetail';
 import { Referrals } from './components/referrals/Referrals';
 import { CompensationScreen } from './components/compensation/CompensationScreen';
 import { CommandPalette } from './components/common/CommandPalette';
+import { RoleBanner } from './components/common/RoleBanner';
 import { LoginScreen } from './components/auth/LoginScreen';
 
 export default function App() {
@@ -45,6 +46,7 @@ export default function App() {
     <div className={`min-h-screen ${darkMode ? 'bg-gray-950 text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
       <Sidebar />
       <main className="pl-14">
+        <RoleBanner />
         <div className="max-w-7xl mx-auto px-6 py-6">
           {loading && view === 'dashboard' ? (
             <div className={`text-center py-24 text-sm ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>
