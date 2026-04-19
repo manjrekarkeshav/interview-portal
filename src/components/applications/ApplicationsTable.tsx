@@ -204,6 +204,63 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
 
   const emptyVal = <span className={`text-xs ${darkMode ? 'text-gray-600' : 'text-gray-300'}`}>—</span>;
 
+  const COMPANY_TYPE_COLORS: Record<CompanyType, string> = {
+    'Series A': 'bg-violet-500/20 text-violet-300 border-violet-500/30',
+    'Series B': 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+    'Series C': 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+    'Series D': 'bg-teal-500/20 text-teal-300 border-teal-500/30',
+    'Series E': 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+    'Pre-IPO': 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+    'Public': 'bg-green-500/20 text-green-300 border-green-500/30',
+  };
+
+  const COMPANY_TYPE_COLORS_LIGHT: Record<CompanyType, string> = {
+    'Series A': 'bg-violet-100 text-violet-700 border-violet-200',
+    'Series B': 'bg-blue-100 text-blue-700 border-blue-200',
+    'Series C': 'bg-cyan-100 text-cyan-700 border-cyan-200',
+    'Series D': 'bg-teal-100 text-teal-700 border-teal-200',
+    'Series E': 'bg-emerald-100 text-emerald-700 border-emerald-200',
+    'Pre-IPO': 'bg-amber-100 text-amber-700 border-amber-200',
+    'Public': 'bg-green-100 text-green-700 border-green-200',
+  };
+
+  const INDUSTRY_COLORS: Record<Industry, string> = {
+    'Bank': 'bg-slate-500/20 text-slate-300 border-slate-500/30',
+    'FinTech': 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+    'Tech': 'bg-sky-500/20 text-sky-300 border-sky-500/30',
+    'Health Tech': 'bg-rose-500/20 text-rose-300 border-rose-500/30',
+    'SaaS': 'bg-orange-500/20 text-orange-300 border-orange-500/30',
+    'AI': 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30',
+    'RETech': 'bg-lime-500/20 text-lime-300 border-lime-500/30',
+    'MarTech': 'bg-pink-500/20 text-pink-300 border-pink-500/30',
+    'Payments': 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+    'Crypto': 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
+  };
+
+  const INDUSTRY_COLORS_LIGHT: Record<Industry, string> = {
+    'Bank': 'bg-slate-100 text-slate-700 border-slate-200',
+    'FinTech': 'bg-blue-100 text-blue-700 border-blue-200',
+    'Tech': 'bg-sky-100 text-sky-700 border-sky-200',
+    'Health Tech': 'bg-rose-100 text-rose-700 border-rose-200',
+    'SaaS': 'bg-orange-100 text-orange-700 border-orange-200',
+    'AI': 'bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200',
+    'RETech': 'bg-lime-100 text-lime-700 border-lime-200',
+    'MarTech': 'bg-pink-100 text-pink-700 border-pink-200',
+    'Payments': 'bg-emerald-100 text-emerald-700 border-emerald-200',
+    'Crypto': 'bg-yellow-100 text-yellow-700 border-yellow-200',
+  };
+
+  const TypePill = ({ value, type }: { value: CompanyType | Industry; type: 'company' | 'industry' }) => {
+    const colorClass = type === 'company'
+      ? (darkMode ? COMPANY_TYPE_COLORS[value as CompanyType] : COMPANY_TYPE_COLORS_LIGHT[value as CompanyType])
+      : (darkMode ? INDUSTRY_COLORS[value as Industry] : INDUSTRY_COLORS_LIGHT[value as Industry]);
+    return (
+      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium border ${colorClass}`}>
+        {value}
+      </span>
+    );
+  };
+
   return (
     <div>
       {!activeOnly && (
@@ -253,7 +310,7 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
                   <span className="flex items-center gap-0.5">Company <SortIcon col="company" /></span>
                 </th>
                 <th className={`${thClass} hidden md:table-cell`}>Role</th>
-                <th className={`${thClass} hidden xl:table-cell`}>Co. Type</th>
+                <th className={`${thClass} hidden xl:table-cell`}>Type</th>
                 <th className={`${thClass} hidden xl:table-cell`}>Industry</th>
                 <th className={`${thClass} hidden lg:table-cell`} onClick={() => toggleSort('current_stage')}>
                   <span className="flex items-center gap-0.5">Stage <SortIcon col="current_stage" /></span>
@@ -265,7 +322,7 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
                   <span className="flex items-center gap-0.5">Outcome <SortIcon col="outcome" /></span>
                 </th>
                 <th className={thClass} onClick={() => toggleSort('updated_at')}>
-                  <span className="flex items-center gap-0.5">Last Act. <SortIcon col="updated_at" /></span>
+                  <span className="flex items-center gap-0.5">Last Activity <SortIcon col="updated_at" /></span>
                 </th>
                 <th className={`${thClass} hidden xl:table-cell`}>Next Event</th>
                 <th className={`${thClass} hidden lg:table-cell`}>Recruiter</th>
@@ -344,20 +401,18 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
                             options={['— Clear —', ...COMPANY_TYPES]}
                             currentVal={app.company_type}
                             renderCurrent={() => app.company_type ? (
-                              <span className={`text-xs hover:underline decoration-dashed underline-offset-2 ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}>
-                                {app.company_type}
-                              </span>
+                              <TypePill value={app.company_type} type="company" />
                             ) : (
                               <span className={`text-xs ${darkMode ? 'text-gray-600 hover:text-gray-400' : 'text-gray-300 hover:text-gray-500'}`}>—</span>
                             )}
                             renderOption={(opt) => opt === '— Clear —'
                               ? <span className={`text-xs italic ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>{opt}</span>
-                              : <span className="text-xs">{opt}</span>
+                              : <TypePill value={opt as CompanyType} type="company" />
                             }
                           />
                         ) : (
                           app.company_type
-                            ? <span className={`text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{app.company_type}</span>
+                            ? <TypePill value={app.company_type} type="company" />
                             : emptyVal
                         )}
                       </td>
@@ -370,20 +425,18 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
                             options={['— Clear —', ...INDUSTRIES]}
                             currentVal={app.industry}
                             renderCurrent={() => app.industry ? (
-                              <span className={`text-xs hover:underline decoration-dashed underline-offset-2 ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}>
-                                {app.industry}
-                              </span>
+                              <TypePill value={app.industry} type="industry" />
                             ) : (
                               <span className={`text-xs ${darkMode ? 'text-gray-600 hover:text-gray-400' : 'text-gray-300 hover:text-gray-500'}`}>—</span>
                             )}
                             renderOption={(opt) => opt === '— Clear —'
                               ? <span className={`text-xs italic ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>{opt}</span>
-                              : <span className="text-xs">{opt}</span>
+                              : <TypePill value={opt as Industry} type="industry" />
                             }
                           />
                         ) : (
                           app.industry
-                            ? <span className={`text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{app.industry}</span>
+                            ? <TypePill value={app.industry} type="industry" />
                             : emptyVal
                         )}
                       </td>
