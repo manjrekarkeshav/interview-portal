@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useStore } from '../../store/useStore';
+import { useAuth } from '../../lib/auth';
 import { Application, Compensation } from '../../lib/types';
 import { formatCurrency } from '../../lib/utils';
 import { BarChart, Bar, XAxis, Cell, Tooltip, ResponsiveContainer } from 'recharts';
@@ -10,6 +11,8 @@ interface Props {
 
 export function CompensationTab({ app }: Props) {
   const { compensations, upsertCompensation, applications, darkMode } = useStore();
+  const { role } = useAuth();
+  const isAdmin = role === 'admin';
   const comp = compensations.find(c => c.application_id === app.id);
 
   const [form, setForm] = useState({
@@ -72,7 +75,8 @@ export function CompensationTab({ app }: Props) {
             className={inputClass}
             placeholder="200000"
             value={form.base || ''}
-            onChange={e => setForm(f => ({ ...f, base: Number(e.target.value) || 0 }))}
+            onChange={isAdmin ? e => setForm(f => ({ ...f, base: Number(e.target.value) || 0 })) : undefined}
+            readOnly={!isAdmin}
           />
         </div>
         <div>
@@ -82,7 +86,8 @@ export function CompensationTab({ app }: Props) {
             className={inputClass}
             placeholder="30000"
             value={form.bonus || ''}
-            onChange={e => setForm(f => ({ ...f, bonus: Number(e.target.value) || 0 }))}
+            onChange={isAdmin ? e => setForm(f => ({ ...f, bonus: Number(e.target.value) || 0 })) : undefined}
+            readOnly={!isAdmin}
           />
         </div>
         <div>
@@ -92,7 +97,8 @@ export function CompensationTab({ app }: Props) {
             className={inputClass}
             placeholder="50000"
             value={form.annual_equity || ''}
-            onChange={e => setForm(f => ({ ...f, annual_equity: Number(e.target.value) || 0 }))}
+            onChange={isAdmin ? e => setForm(f => ({ ...f, annual_equity: Number(e.target.value) || 0 })) : undefined}
+            readOnly={!isAdmin}
           />
         </div>
         <div>
@@ -102,7 +108,8 @@ export function CompensationTab({ app }: Props) {
             className={inputClass}
             placeholder="200000"
             value={form.total_equity || ''}
-            onChange={e => setForm(f => ({ ...f, total_equity: Number(e.target.value) || 0 }))}
+            onChange={isAdmin ? e => setForm(f => ({ ...f, total_equity: Number(e.target.value) || 0 })) : undefined}
+            readOnly={!isAdmin}
           />
         </div>
       </div>
@@ -114,16 +121,19 @@ export function CompensationTab({ app }: Props) {
           rows={3}
           placeholder="e.g. 1Y cliff, 25% each year after..."
           value={form.notes}
-          onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
+          onChange={isAdmin ? e => setForm(f => ({ ...f, notes: e.target.value })) : undefined}
+          readOnly={!isAdmin}
         />
       </div>
 
-      <button
-        onClick={handleSave}
-        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${saved ? 'bg-green-600 text-white' : 'bg-blue-600 hover:bg-blue-500 text-white'}`}
-      >
-        {saved ? '✓ Saved' : 'Save Compensation'}
-      </button>
+      {isAdmin && (
+        <button
+          onClick={handleSave}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${saved ? 'bg-green-600 text-white' : 'bg-blue-600 hover:bg-blue-500 text-white'}`}
+        >
+          {saved ? 'Saved' : 'Save Compensation'}
+        </button>
+      )}
 
       {comparisonData.length > 1 && (
         <div>

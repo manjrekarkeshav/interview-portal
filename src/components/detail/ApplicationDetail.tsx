@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, CreditCard as Edit2, Check, X, ArrowRight, Ghost, Calendar } from 'lucide-react';
 import { useStore } from '../../store/useStore';
+import { useAuth } from '../../lib/auth';
 import { Application, Priority, AppStatus, Stage, Outcome, H1BSponsorship, PRIORITIES, STAGES, STATUSES, OUTCOMES } from '../../lib/types';
 import { PriorityPill } from '../common/PriorityPill';
 import { OutcomePill, StatusPill } from '../common/StatusPill';
@@ -14,6 +15,8 @@ interface Props {
 
 export function ApplicationDetail({ appId }: Props) {
   const { applications, events, updateApplication, advanceStage, markGhosted, darkMode, setView, fetchApplication } = useStore();
+  const { role } = useAuth();
+  const isAdmin = role === 'admin';
   const [tab, setTab] = useState<'timeline' | 'compensation' | 'feedback'>('timeline');
   const [editing, setEditing] = useState(false);
 
@@ -70,7 +73,7 @@ export function ApplicationDetail({ appId }: Props) {
       </div>
 
       <div className={`rounded-xl border p-5 ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
-        {editing ? (
+        {isAdmin && editing ? (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -166,26 +169,28 @@ export function ApplicationDetail({ appId }: Props) {
                   </div>
                 )}
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => advanceStage(app.id)}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs border font-medium transition-colors ${darkMode ? 'border-gray-700 text-gray-300 hover:bg-gray-800' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
-                >
-                  <ArrowRight size={12} /> Next Stage
-                </button>
-                <button
-                  onClick={() => markGhosted(app.id)}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs border border-purple-800 text-purple-400 hover:bg-purple-900/30 font-medium"
-                >
-                  <Ghost size={12} /> Ghosted
-                </button>
-                <button
-                  onClick={() => setEditing(true)}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs border font-medium transition-colors ${darkMode ? 'border-gray-700 text-gray-400 hover:bg-gray-800' : 'border-gray-300 text-gray-500 hover:bg-gray-50'}`}
-                >
-                  <Edit2 size={12} /> Edit
-                </button>
-              </div>
+              {isAdmin && (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => advanceStage(app.id)}
+                    className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs border font-medium transition-colors ${darkMode ? 'border-gray-700 text-gray-300 hover:bg-gray-800' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+                  >
+                    <ArrowRight size={12} /> Next Stage
+                  </button>
+                  <button
+                    onClick={() => markGhosted(app.id)}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs border border-purple-800 text-purple-400 hover:bg-purple-900/30 font-medium"
+                  >
+                    <Ghost size={12} /> Ghosted
+                  </button>
+                  <button
+                    onClick={() => setEditing(true)}
+                    className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs border font-medium transition-colors ${darkMode ? 'border-gray-700 text-gray-400 hover:bg-gray-800' : 'border-gray-300 text-gray-500 hover:bg-gray-50'}`}
+                  >
+                    <Edit2 size={12} /> Edit
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className={`flex items-center gap-1 flex-wrap`}>

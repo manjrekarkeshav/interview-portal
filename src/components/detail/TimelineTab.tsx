@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useStore } from '../../store/useStore';
+import { useAuth } from '../../lib/auth';
 import { Application } from '../../lib/types';
 import { getEventIcon, formatDate } from '../../lib/utils';
 import { LogEventModal } from './LogEventModal';
@@ -11,6 +12,8 @@ interface Props {
 
 export function TimelineTab({ app }: Props) {
   const { events, deleteEvent, darkMode, advanceStage, markGhosted } = useStore();
+  const { role } = useAuth();
+  const isAdmin = role === 'admin';
   const [showLog, setShowLog] = useState(false);
 
   const appEvents = events
@@ -19,28 +22,30 @@ export function TimelineTab({ app }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowLog(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-blue-600 text-white hover:bg-blue-500 font-medium"
-          >
-            <Plus size={12} /> Log Event
-          </button>
-          <button
-            onClick={() => advanceStage(app.id)}
-            className={`px-3 py-1.5 rounded-lg text-xs border font-medium transition-colors ${darkMode ? 'border-gray-700 text-gray-300 hover:bg-gray-800' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
-          >
-            → Advance Stage
-          </button>
-          <button
-            onClick={() => markGhosted(app.id)}
-            className="px-3 py-1.5 rounded-lg text-xs border border-purple-800 text-purple-400 hover:bg-purple-900/30 font-medium"
-          >
-            👻 Mark Ghosted
-          </button>
+      {isAdmin && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowLog(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-blue-600 text-white hover:bg-blue-500 font-medium"
+            >
+              <Plus size={12} /> Log Event
+            </button>
+            <button
+              onClick={() => advanceStage(app.id)}
+              className={`px-3 py-1.5 rounded-lg text-xs border font-medium transition-colors ${darkMode ? 'border-gray-700 text-gray-300 hover:bg-gray-800' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+            >
+              Advance Stage
+            </button>
+            <button
+              onClick={() => markGhosted(app.id)}
+              className="px-3 py-1.5 rounded-lg text-xs border border-purple-800 text-purple-400 hover:bg-purple-900/30 font-medium"
+            >
+              Mark Ghosted
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {appEvents.length === 0 ? (
         <div className={`text-center py-12 text-sm ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>
@@ -70,18 +75,20 @@ export function TimelineTab({ app }: Props) {
                   <p className={`text-sm mt-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{event.description}</p>
                 )}
               </div>
-              <button
-                onClick={() => deleteEvent(event.id)}
-                className={`opacity-0 group-hover:opacity-100 p-1 rounded transition-all ${darkMode ? 'hover:bg-gray-700 text-gray-600 hover:text-red-400' : 'hover:bg-gray-100 text-gray-400 hover:text-red-500'}`}
-              >
-                <Trash2 size={12} />
-              </button>
+              {isAdmin && (
+                <button
+                  onClick={() => deleteEvent(event.id)}
+                  className={`opacity-0 group-hover:opacity-100 p-1 rounded transition-all ${darkMode ? 'hover:bg-gray-700 text-gray-600 hover:text-red-400' : 'hover:bg-gray-100 text-gray-400 hover:text-red-500'}`}
+                >
+                  <Trash2 size={12} />
+                </button>
+              )}
             </div>
           ))}
         </div>
       )}
 
-      {showLog && <LogEventModal applicationId={app.id} currentStage={app.current_stage} onClose={() => setShowLog(false)} />}
+      {isAdmin && showLog && <LogEventModal applicationId={app.id} currentStage={app.current_stage} onClose={() => setShowLog(false)} />}
     </div>
   );
 }

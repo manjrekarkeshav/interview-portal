@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { ChevronUp, ChevronDown, MoreHorizontal, Ghost, ArrowRight, Plus, Trash2, Eye } from 'lucide-react';
 import { useStore } from '../../store/useStore';
+import { useAuth } from '../../lib/auth';
 import { Application, Priority, AppStatus, Outcome, Stage, STAGES, PRIORITIES, STATUSES, OUTCOMES } from '../../lib/types';
 import { PriorityPill } from '../common/PriorityPill';
 import { OutcomePill, StatusPill } from '../common/StatusPill';
@@ -17,6 +18,8 @@ type SortDir = 'asc' | 'desc';
 
 export function ApplicationsTable({ filterStage, activeOnly }: Props) {
   const { applications, events, darkMode, setView, markGhosted, advanceStage, deleteApplication, updateApplication } = useStore();
+  const { role } = useAuth();
+  const isAdmin = role === 'admin';
   const [search, setSearch] = useState('');
   const [priorities, setPriorities] = useState<Priority[]>([]);
   const [stages, setStages] = useState<Stage[]>([]);
@@ -216,12 +219,14 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
             >
               {showAll ? 'Show Active Only' : 'Show All'}
             </button>
-            <button
-              onClick={() => setShowNew(true)}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs bg-blue-600 text-white hover:bg-blue-500 font-medium"
-            >
-              <Plus size={12} /> New
-            </button>
+            {isAdmin && (
+              <button
+                onClick={() => setShowNew(true)}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs bg-blue-600 text-white hover:bg-blue-500 font-medium"
+              >
+                <Plus size={12} /> New
+              </button>
+            )}
           </div>
           <div className="flex items-center gap-1 flex-wrap">
             <span className={`text-xs ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>Priority:</span>
@@ -272,12 +277,12 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
                     onClick={() => setView('detail', app.id)}
                   >
                     <td className={tdClass}>
-                      <PriorityPill priority={app.priority} onClick={(e: React.MouseEvent) => {
+                      <PriorityPill priority={app.priority} onClick={isAdmin ? (e: React.MouseEvent) => {
                         e.stopPropagation();
                         const idx = PRIORITIES.indexOf(app.priority);
                         const next = PRIORITIES[(idx + 1) % PRIORITIES.length];
                         updateApplication(app.id, { priority: next });
-                      }} />
+                      } : undefined} />
                     </td>
                     <td className={tdClass}>
                       <span className={`font-medium text-sm ${darkMode ? 'text-white' : 'text-gray-900'}`}>{app.company}</span>
@@ -286,7 +291,7 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
                       )}
                     </td>
                     <td className={`${tdClass} hidden md:table-cell`} onClick={e => e.stopPropagation()}>
-                      {editingRole?.appId === app.id ? (
+                      {isAdmin && editingRole?.appId === app.id ? (
                         <input
                           ref={roleInputRef}
                           value={editingRole.value}
@@ -304,55 +309,70 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
                         />
                       ) : (
                         <span
-                          onClick={() => setEditingRole({ appId: app.id, value: app.role })}
-                          className={`text-sm cursor-text hover:underline decoration-dashed underline-offset-2 ${darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}
+                          onClick={isAdmin ? () => setEditingRole({ appId: app.id, value: app.role }) : undefined}
+                          className={`text-sm ${isAdmin ? 'cursor-text hover:underline decoration-dashed underline-offset-2' : ''} ${darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}
                         >
                           {app.role}
                         </span>
                       )}
                     </td>
                     <td className={`${tdClass} hidden lg:table-cell`}>
-                      <InlineDropdown
-                        appId={app.id}
-                        field="stage"
-                        options={STAGES}
-                        currentVal={app.current_stage}
-                        renderCurrent={() => (
-                          <span className={`text-xs font-mono hover:underline decoration-dashed underline-offset-2 ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}>
-                            {app.current_stage}
-                            <span className={`ml-1.5 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>{getStageIndex(app.current_stage) + 1}/{STAGES.length}</span>
-                          </span>
-                        )}
-                        renderOption={(opt) => (
-                          <span className="font-mono">{opt}</span>
-                        )}
-                      />
+                      {isAdmin ? (
+                        <InlineDropdown
+                          appId={app.id}
+                          field="stage"
+                          options={STAGES}
+                          currentVal={app.current_stage}
+                          renderCurrent={() => (
+                            <span className={`text-xs font-mono hover:underline decoration-dashed underline-offset-2 ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}>
+                              {app.current_stage}
+                              <span className={`ml-1.5 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>{getStageIndex(app.current_stage) + 1}/{STAGES.length}</span>
+                            </span>
+                          )}
+                          renderOption={(opt) => (
+                            <span className="font-mono">{opt}</span>
+                          )}
+                        />
+                      ) : (
+                        <span className={`text-xs font-mono ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                          {app.current_stage}
+                          <span className={`ml-1.5 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>{getStageIndex(app.current_stage) + 1}/{STAGES.length}</span>
+                        </span>
+                      )}
                     </td>
                     <td className={tdClass}>
-                      <InlineDropdown
-                        appId={app.id}
-                        field="status"
-                        options={STATUSES}
-                        currentVal={app.status}
-                        renderCurrent={() => <StatusPill status={app.status} />}
-                        renderOption={(opt) => <StatusPill status={opt as AppStatus} />}
-                      />
+                      {isAdmin ? (
+                        <InlineDropdown
+                          appId={app.id}
+                          field="status"
+                          options={STATUSES}
+                          currentVal={app.status}
+                          renderCurrent={() => <StatusPill status={app.status} />}
+                          renderOption={(opt) => <StatusPill status={opt as AppStatus} />}
+                        />
+                      ) : (
+                        <StatusPill status={app.status} />
+                      )}
                     </td>
                     <td className={tdClass}>
-                      <InlineDropdown
-                        appId={app.id}
-                        field="outcome"
-                        options={['— Clear —', ...OUTCOMES]}
-                        currentVal={app.outcome}
-                        renderCurrent={() => app.outcome
-                          ? <OutcomePill outcome={app.outcome} />
-                          : <span className={`text-xs ${darkMode ? 'text-gray-600 hover:text-gray-400' : 'text-gray-300 hover:text-gray-500'}`}>—</span>
-                        }
-                        renderOption={(opt) => opt === '— Clear —'
-                          ? <span className={`text-xs italic ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>{opt}</span>
-                          : <OutcomePill outcome={opt as Outcome} />
-                        }
-                      />
+                      {isAdmin ? (
+                        <InlineDropdown
+                          appId={app.id}
+                          field="outcome"
+                          options={['— Clear —', ...OUTCOMES]}
+                          currentVal={app.outcome}
+                          renderCurrent={() => app.outcome
+                            ? <OutcomePill outcome={app.outcome} />
+                            : <span className={`text-xs ${darkMode ? 'text-gray-600 hover:text-gray-400' : 'text-gray-300 hover:text-gray-500'}`}>—</span>
+                          }
+                          renderOption={(opt) => opt === '— Clear —'
+                            ? <span className={`text-xs italic ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>{opt}</span>
+                            : <OutcomePill outcome={opt as Outcome} />
+                          }
+                        />
+                      ) : (
+                        app.outcome ? <OutcomePill outcome={app.outcome} /> : <span className={`text-xs ${darkMode ? 'text-gray-600' : 'text-gray-300'}`}>—</span>
+                      )}
                     </td>
                     <td className={`${tdClass} font-mono text-xs`}>
                       <span className={stale ? 'text-red-400' : darkMode ? 'text-gray-500' : 'text-gray-500'}>
@@ -382,16 +402,20 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
                             <button onClick={() => { setView('detail', app.id); setOpenMenu(null); }} className={`w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 ${darkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-50 text-gray-700'}`}>
                               <Eye size={12} /> View Details
                             </button>
-                            <button onClick={() => { advanceStage(app.id); setOpenMenu(null); }} className={`w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 ${darkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-50 text-gray-700'}`}>
-                              <ArrowRight size={12} /> Advance Stage
-                            </button>
-                            <button onClick={() => { markGhosted(app.id); setOpenMenu(null); }} className={`w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 ${darkMode ? 'hover:bg-gray-700 text-purple-400' : 'hover:bg-gray-50 text-purple-600'}`}>
-                              <Ghost size={12} /> Mark Ghosted
-                            </button>
-                            <div className={`my-1 border-t ${darkMode ? 'border-gray-700' : 'border-gray-100'}`} />
-                            <button onClick={() => { deleteApplication(app.id); setOpenMenu(null); }} className={`w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 ${darkMode ? 'hover:bg-gray-700 text-red-400' : 'hover:bg-gray-50 text-red-500'}`}>
-                              <Trash2 size={12} /> Delete
-                            </button>
+                            {isAdmin && (
+                              <>
+                                <button onClick={() => { advanceStage(app.id); setOpenMenu(null); }} className={`w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 ${darkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-50 text-gray-700'}`}>
+                                  <ArrowRight size={12} /> Advance Stage
+                                </button>
+                                <button onClick={() => { markGhosted(app.id); setOpenMenu(null); }} className={`w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 ${darkMode ? 'hover:bg-gray-700 text-purple-400' : 'hover:bg-gray-50 text-purple-600'}`}>
+                                  <Ghost size={12} /> Mark Ghosted
+                                </button>
+                                <div className={`my-1 border-t ${darkMode ? 'border-gray-700' : 'border-gray-100'}`} />
+                                <button onClick={() => { deleteApplication(app.id); setOpenMenu(null); }} className={`w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 ${darkMode ? 'hover:bg-gray-700 text-red-400' : 'hover:bg-gray-50 text-red-500'}`}>
+                                  <Trash2 size={12} /> Delete
+                                </button>
+                              </>
+                            )}
                           </div>
                         )}
                       </div>

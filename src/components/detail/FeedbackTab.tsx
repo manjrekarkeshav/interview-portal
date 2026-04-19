@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Plus, Trash2, CreditCard as Edit2, Check, X } from 'lucide-react';
 import { useStore } from '../../store/useStore';
+import { useAuth } from '../../lib/auth';
 import { Application, FeedbackNote } from '../../lib/types';
 import { formatDate } from '../../lib/utils';
 
@@ -10,6 +11,8 @@ interface Props {
 
 function FeedbackBlock({ note, darkMode }: { note: FeedbackNote; darkMode: boolean }) {
   const { updateFeedback, deleteFeedback } = useStore();
+  const { role } = useAuth();
+  const isAdmin = role === 'admin';
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ ...note });
 
@@ -57,14 +60,16 @@ function FeedbackBlock({ note, darkMode }: { note: FeedbackNote; darkMode: boole
               )}
               <span className={`text-xs font-mono ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>{formatDate(note.date)}</span>
             </div>
-            <div className="flex items-center gap-1">
-              <button onClick={() => setEditing(true)} className={`p-1 rounded ${darkMode ? 'hover:bg-gray-700 text-gray-600 hover:text-gray-300' : 'hover:bg-gray-100 text-gray-400'}`}>
-                <Edit2 size={12} />
-              </button>
-              <button onClick={() => deleteFeedback(note.id)} className={`p-1 rounded ${darkMode ? 'hover:bg-gray-700 text-gray-600 hover:text-red-400' : 'hover:bg-gray-100 text-gray-400 hover:text-red-500'}`}>
-                <Trash2 size={12} />
-              </button>
-            </div>
+            {isAdmin && (
+              <div className="flex items-center gap-1">
+                <button onClick={() => setEditing(true)} className={`p-1 rounded ${darkMode ? 'hover:bg-gray-700 text-gray-600 hover:text-gray-300' : 'hover:bg-gray-100 text-gray-400'}`}>
+                  <Edit2 size={12} />
+                </button>
+                <button onClick={() => deleteFeedback(note.id)} className={`p-1 rounded ${darkMode ? 'hover:bg-gray-700 text-gray-600 hover:text-red-400' : 'hover:bg-gray-100 text-gray-400 hover:text-red-500'}`}>
+                  <Trash2 size={12} />
+                </button>
+              </div>
+            )}
           </div>
           {note.content ? (
             <pre className={`text-xs whitespace-pre-wrap font-mono leading-relaxed ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>{note.content}</pre>
@@ -79,6 +84,8 @@ function FeedbackBlock({ note, darkMode }: { note: FeedbackNote; darkMode: boole
 
 export function FeedbackTab({ app }: Props) {
   const { feedbackNotes, interviewStructures, createFeedback, upsertInterviewStructure, darkMode } = useStore();
+  const { role } = useAuth();
+  const isAdmin = role === 'admin';
   const [adding, setAdding] = useState(false);
   const [newNote, setNewNote] = useState({ interviewer_name: '', round: '', date: new Date().toISOString().split('T')[0], content: '' });
 
@@ -114,12 +121,14 @@ export function FeedbackTab({ app }: Props) {
       <div>
         <div className="flex items-center justify-between mb-3">
           <h3 className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Interviewer Feedback</h3>
-          <button
-            onClick={() => setAdding(true)}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs bg-blue-600 text-white hover:bg-blue-500"
-          >
-            <Plus size={12} /> Add Feedback
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => setAdding(true)}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs bg-blue-600 text-white hover:bg-blue-500"
+            >
+              <Plus size={12} /> Add Feedback
+            </button>
+          )}
         </div>
 
         {adding && (
@@ -157,7 +166,8 @@ export function FeedbackTab({ app }: Props) {
               rows={4}
               placeholder="Recruiter Screen (30 min)&#10;HM Intro (45 min)&#10;Product Sense (60 min)&#10;Onsite: 4x 45 min loops"
               value={rounds}
-              onChange={e => setRounds(e.target.value)}
+              onChange={isAdmin ? e => setRounds(e.target.value) : undefined}
+              readOnly={!isAdmin}
             />
           </div>
           <div>
@@ -167,15 +177,18 @@ export function FeedbackTab({ app }: Props) {
               rows={3}
               placeholder="Notes about the process, timeline, etc."
               value={generalNotes}
-              onChange={e => setGeneralNotes(e.target.value)}
+              onChange={isAdmin ? e => setGeneralNotes(e.target.value) : undefined}
+              readOnly={!isAdmin}
             />
           </div>
-          <button
-            onClick={handleSaveStructure}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${structureSaved ? 'bg-green-600 text-white' : 'bg-blue-600 hover:bg-blue-500 text-white'}`}
-          >
-            {structureSaved ? '✓ Saved' : 'Save Structure'}
-          </button>
+          {isAdmin && (
+            <button
+              onClick={handleSaveStructure}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${structureSaved ? 'bg-green-600 text-white' : 'bg-blue-600 hover:bg-blue-500 text-white'}`}
+            >
+              {structureSaved ? 'Saved' : 'Save Structure'}
+            </button>
+          )}
         </div>
       </div>
     </div>

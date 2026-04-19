@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { Plus, Trash2, ExternalLink, Check } from 'lucide-react';
 import { useStore } from '../../store/useStore';
+import { useAuth } from '../../lib/auth';
 import { ReferralStatus } from '../../lib/types';
 
 export function Referrals() {
   const { referrals, createReferral, updateReferral, deleteReferral, applications, darkMode, setView } = useStore();
+  const { role } = useAuth();
+  const isAdmin = role === 'admin';
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState({ company: '', poc_name: '', status: 'Reached out' as ReferralStatus, application_id: '' });
 
@@ -33,12 +36,14 @@ export function Referrals() {
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <h1 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Referrals</h1>
-        <button
-          onClick={() => setAdding(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-blue-600 text-white hover:bg-blue-500 font-medium"
-        >
-          <Plus size={12} /> Add Referral
-        </button>
+        {isAdmin && (
+          <button
+            onClick={() => setAdding(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-blue-600 text-white hover:bg-blue-500 font-medium"
+          >
+            <Plus size={12} /> Add Referral
+          </button>
+        )}
       </div>
 
       {adding && (
@@ -102,24 +107,29 @@ export function Referrals() {
                     <td className={`px-4 py-3 text-sm font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>{ref.company}</td>
                     <td className={`px-4 py-3 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{ref.poc_name}</td>
                     <td className="px-4 py-3">
-                      <select
-                        value={ref.status}
-                        onChange={e => updateReferral(ref.id, { status: e.target.value as ReferralStatus })}
-                        className={`text-xs rounded px-2 py-1 border-0 outline-none cursor-pointer ${statusColors[ref.status]}`}
-                      >
-                        <option>Reached out</option>
-                        <option>In progress</option>
-                        <option>Closed</option>
-                      </select>
+                      {isAdmin ? (
+                        <select
+                          value={ref.status}
+                          onChange={e => updateReferral(ref.id, { status: e.target.value as ReferralStatus })}
+                          className={`text-xs rounded px-2 py-1 border-0 outline-none cursor-pointer ${statusColors[ref.status]}`}
+                        >
+                          <option>Reached out</option>
+                          <option>In progress</option>
+                          <option>Closed</option>
+                        </select>
+                      ) : (
+                        <span className={`text-xs rounded px-2 py-1 ${statusColors[ref.status]}`}>{ref.status}</span>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <button
-                        onClick={() => updateReferral(ref.id, { referred: !ref.referred })}
+                        onClick={isAdmin ? () => updateReferral(ref.id, { referred: !ref.referred }) : undefined}
+                        disabled={!isAdmin}
                         className={`w-6 h-6 rounded border flex items-center justify-center transition-colors ${
                           ref.referred
                             ? 'bg-green-600 border-green-600 text-white'
-                            : darkMode ? 'border-gray-700 hover:border-gray-500' : 'border-gray-300 hover:border-gray-400'
-                        }`}
+                            : darkMode ? 'border-gray-700' : 'border-gray-300'
+                        } ${isAdmin ? (ref.referred ? '' : darkMode ? 'hover:border-gray-500' : 'hover:border-gray-400') : 'cursor-default opacity-70'}`}
                       >
                         {ref.referred && <Check size={12} />}
                       </button>
@@ -137,12 +147,14 @@ export function Referrals() {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <button
-                        onClick={() => deleteReferral(ref.id)}
-                        className={`p-1 rounded transition-colors ${darkMode ? 'hover:bg-gray-700 text-gray-600 hover:text-red-400' : 'hover:bg-gray-100 text-gray-400 hover:text-red-500'}`}
-                      >
-                        <Trash2 size={12} />
-                      </button>
+                      {isAdmin && (
+                        <button
+                          onClick={() => deleteReferral(ref.id)}
+                          className={`p-1 rounded transition-colors ${darkMode ? 'hover:bg-gray-700 text-gray-600 hover:text-red-400' : 'hover:bg-gray-100 text-gray-400 hover:text-red-500'}`}
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 );

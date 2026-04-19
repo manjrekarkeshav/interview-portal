@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { useStore } from '../../store/useStore';
+import { useAuth } from '../../lib/auth';
 import { Application, AppStatus, Compensation, Priority, PRIORITIES, STATUSES } from '../../lib/types';
 import { PriorityPill } from '../common/PriorityPill';
 import { StatusPill } from '../common/StatusPill';
@@ -19,16 +20,18 @@ interface CellProps {
   field: 'base' | 'bonus' | 'annual_equity' | 'total_equity';
   comp: Compensation | undefined;
   darkMode: boolean;
+  isAdmin: boolean;
   onCommit: (appId: string, field: 'base' | 'bonus' | 'annual_equity' | 'total_equity', value: number) => void;
   onLiveChange?: (field: 'base' | 'bonus' | 'annual_equity' | 'total_equity', value: number) => void;
 }
 
-function EditableNumericCell({ app, field, comp, darkMode, onCommit, onLiveChange }: CellProps) {
+function EditableNumericCell({ app, field, comp, darkMode, isAdmin, onCommit, onLiveChange }: CellProps) {
   const stored = comp?.[field] ?? 0;
   const [editing, setEditing] = useState(false);
   const [inputVal, setInputVal] = useState('');
 
   const handleClick = (e: React.MouseEvent) => {
+    if (!isAdmin) return;
     e.stopPropagation();
     setInputVal(stored === 0 ? '' : String(stored));
     setEditing(true);
@@ -71,7 +74,7 @@ function EditableNumericCell({ app, field, comp, darkMode, onCommit, onLiveChang
   return (
     <span
       onClick={handleClick}
-      className={`font-mono text-xs cursor-text hover:underline decoration-dashed underline-offset-2 ${
+      className={`font-mono text-xs ${isAdmin ? 'cursor-text hover:underline decoration-dashed underline-offset-2' : ''} ${
         darkMode ? 'text-gray-200 hover:text-white' : 'text-gray-800 hover:text-gray-900'
       }`}
     >
@@ -84,10 +87,11 @@ interface NotesProps {
   app: Application;
   comp: Compensation | undefined;
   darkMode: boolean;
+  isAdmin: boolean;
   onCommit: (appId: string, notes: string) => void;
 }
 
-function NotesCell({ app, comp, darkMode, onCommit }: NotesProps) {
+function NotesCell({ app, comp, darkMode, isAdmin, onCommit }: NotesProps) {
   const stored = comp?.notes ?? '';
   const [editing, setEditing] = useState(false);
   const [val, setVal] = useState('');
@@ -117,8 +121,8 @@ function NotesCell({ app, comp, darkMode, onCommit }: NotesProps) {
 
   return (
     <span
-      onClick={e => { e.stopPropagation(); setVal(stored); setEditing(true); }}
-      className={`text-xs cursor-text truncate block max-w-[180px] hover:underline decoration-dashed underline-offset-2 ${
+      onClick={isAdmin ? e => { e.stopPropagation(); setVal(stored); setEditing(true); } : undefined}
+      className={`text-xs truncate block max-w-[180px] ${isAdmin ? 'cursor-text hover:underline decoration-dashed underline-offset-2' : ''} ${
         stored
           ? darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'
           : darkMode ? 'text-gray-600 hover:text-gray-400' : 'text-gray-400 hover:text-gray-600'
@@ -133,6 +137,7 @@ function CompensationRow({
   app,
   comp,
   darkMode,
+  isAdmin,
   onCommitField,
   onCommitNotes,
   onUpdateApplication,
@@ -140,6 +145,7 @@ function CompensationRow({
   app: Application;
   comp: Compensation | undefined;
   darkMode: boolean;
+  isAdmin: boolean;
   onCommitField: (appId: string, field: 'base' | 'bonus' | 'annual_equity' | 'total_equity', value: number) => void;
   onCommitNotes: (appId: string, notes: string) => void;
   onUpdateApplication: (id: string, updates: Partial<Application>) => void;
@@ -169,12 +175,12 @@ function CompensationRow({
   return (
     <tr className={`border-b transition-colors ${darkMode ? 'border-gray-800 hover:bg-gray-800/30' : 'border-gray-100 hover:bg-gray-50/70'}`}>
       <td className={tdClass}>
-        <PriorityPill priority={app.priority} onClick={(e: React.MouseEvent) => {
+        <PriorityPill priority={app.priority} onClick={isAdmin ? (e: React.MouseEvent) => {
           e.stopPropagation();
           const idx = PRIORITIES.indexOf(app.priority);
           const next = PRIORITIES[(idx + 1) % PRIORITIES.length];
           onUpdateApplication(app.id, { priority: next });
-        }} />
+        } : undefined} />
       </td>
       <td className={tdClass}>
         <span className={`font-medium text-sm ${darkMode ? 'text-white' : 'text-gray-900'}`}>{app.company}</span>
@@ -183,16 +189,16 @@ function CompensationRow({
         <span className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{app.role}</span>
       </td>
       <td className={tdClass} onClick={e => e.stopPropagation()}>
-        <EditableNumericCell app={app} field="base" comp={comp} darkMode={darkMode} onCommit={onCommitField} onLiveChange={handleLiveChange} />
+        <EditableNumericCell app={app} field="base" comp={comp} darkMode={darkMode} isAdmin={isAdmin} onCommit={onCommitField} onLiveChange={handleLiveChange} />
       </td>
       <td className={tdClass} onClick={e => e.stopPropagation()}>
-        <EditableNumericCell app={app} field="bonus" comp={comp} darkMode={darkMode} onCommit={onCommitField} onLiveChange={handleLiveChange} />
+        <EditableNumericCell app={app} field="bonus" comp={comp} darkMode={darkMode} isAdmin={isAdmin} onCommit={onCommitField} onLiveChange={handleLiveChange} />
       </td>
       <td className={tdClass} onClick={e => e.stopPropagation()}>
-        <EditableNumericCell app={app} field="annual_equity" comp={comp} darkMode={darkMode} onCommit={onCommitField} onLiveChange={handleLiveChange} />
+        <EditableNumericCell app={app} field="annual_equity" comp={comp} darkMode={darkMode} isAdmin={isAdmin} onCommit={onCommitField} onLiveChange={handleLiveChange} />
       </td>
       <td className={tdClass} onClick={e => e.stopPropagation()}>
-        <EditableNumericCell app={app} field="total_equity" comp={comp} darkMode={darkMode} onCommit={onCommitField} />
+        <EditableNumericCell app={app} field="total_equity" comp={comp} darkMode={darkMode} isAdmin={isAdmin} onCommit={onCommitField} />
       </td>
       <td className={tdClass}>
         <span className={`font-mono text-xs font-medium ${darkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
@@ -203,7 +209,7 @@ function CompensationRow({
         <StatusPill status={app.status} />
       </td>
       <td className={`${tdClass} max-w-[200px]`} onClick={e => e.stopPropagation()}>
-        <NotesCell app={app} comp={comp} darkMode={darkMode} onCommit={onCommitNotes} />
+        <NotesCell app={app} comp={comp} darkMode={darkMode} isAdmin={isAdmin} onCommit={onCommitNotes} />
       </td>
     </tr>
   );
@@ -211,6 +217,8 @@ function CompensationRow({
 
 export function CompensationTable() {
   const { applications, compensations, darkMode, upsertCompensation, updateApplication } = useStore();
+  const { role } = useAuth();
+  const isAdmin = role === 'admin';
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<AppStatus[]>([]);
@@ -393,6 +401,7 @@ export function CompensationTable() {
                   app={app}
                   comp={compByApp[app.id]}
                   darkMode={darkMode}
+                  isAdmin={isAdmin}
                   onCommitField={handleCommitField}
                   onCommitNotes={handleCommitNotes}
                   onUpdateApplication={updateApplication}
