@@ -72,7 +72,7 @@ export function getOutcomeColor(outcome: Outcome | null | undefined): string {
   if (!outcome) return 'bg-gray-700 text-gray-300';
   switch (outcome) {
     case 'Scheduled': return 'bg-sky-900 text-sky-300';
-    case 'Complete': return 'bg-teal-900 text-teal-300';
+    case 'Complete': return 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
     case 'Reject': return 'bg-rose-900 text-rose-400';
     case 'Ghosted': return 'bg-slate-700 text-slate-400';
     case 'Role Closed': return 'bg-zinc-700 text-zinc-400';
@@ -84,8 +84,8 @@ export function getOutcomeColor(outcome: Outcome | null | undefined): string {
 export function getStatusColor(status: string): string {
   switch (status) {
     case 'Not Started': return 'bg-gray-800 text-gray-400';
-    case 'Active': return 'bg-green-900 text-green-300';
-    case 'Pending Response': return 'bg-amber-900 text-amber-300';
+    case 'Active': return 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/40';
+    case 'Pending Response': return 'bg-amber-400/20 text-amber-300 border border-amber-400/40';
     case 'Closed': return 'bg-red-950 text-red-400';
     default: return 'bg-gray-700 text-gray-300';
   }

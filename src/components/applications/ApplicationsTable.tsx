@@ -225,7 +225,7 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
     'Series D': 'bg-teal-500/20 text-teal-300 border-teal-500/30',
     'Series E': 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
     'Pre-IPO': 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-    'Public': 'bg-green-500/20 text-green-300 border-green-500/30',
+    'Public': 'bg-blue-500/20 text-blue-200 border-blue-400/40',
     'Acquired': 'bg-gray-500/20 text-gray-300 border-gray-500/30',
   };
 
@@ -236,7 +236,7 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
     'Series D': 'bg-teal-100 text-teal-700 border-teal-200',
     'Series E': 'bg-emerald-100 text-emerald-700 border-emerald-200',
     'Pre-IPO': 'bg-amber-100 text-amber-700 border-amber-200',
-    'Public': 'bg-green-100 text-green-700 border-green-200',
+    'Public': 'bg-blue-100 text-blue-700 border-blue-300',
     'Acquired': 'bg-gray-100 text-gray-600 border-gray-200',
   };
 
