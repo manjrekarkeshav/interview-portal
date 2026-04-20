@@ -212,6 +212,7 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
     'Series E': 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
     'Pre-IPO': 'bg-amber-500/20 text-amber-300 border-amber-500/30',
     'Public': 'bg-green-500/20 text-green-300 border-green-500/30',
+    'Acquired': 'bg-gray-500/20 text-gray-300 border-gray-500/30',
   };
 
   const COMPANY_TYPE_COLORS_LIGHT: Record<CompanyType, string> = {
@@ -222,6 +223,7 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
     'Series E': 'bg-emerald-100 text-emerald-700 border-emerald-200',
     'Pre-IPO': 'bg-amber-100 text-amber-700 border-amber-200',
     'Public': 'bg-green-100 text-green-700 border-green-200',
+    'Acquired': 'bg-gray-100 text-gray-600 border-gray-200',
   };
 
   const TypePill = ({ value, type }: { value: CompanyType | Industry; type: 'company' | 'industry' }) => {

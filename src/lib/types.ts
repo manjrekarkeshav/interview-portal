@@ -1,6 +1,6 @@
 export type Priority = 'P0' | 'P0.5' | 'P1' | 'P2';
 export type AppStatus = 'Not Started' | 'Active' | 'Pending Response' | 'Closed';
-export type CompanyType = 'Series A' | 'Series B' | 'Series C' | 'Series D' | 'Series E' | 'Pre-IPO' | 'Public';
+export type CompanyType = 'Series A' | 'Series B' | 'Series C' | 'Series D' | 'Series E' | 'Pre-IPO' | 'Public' | 'Acquired';
 export type Industry = 'Bank' | 'FinTech' | 'Tech' | 'Health Tech' | 'SaaS' | 'AI' | 'RETech' | 'MarTech' | 'Payments' | 'Crypto' | 'Cyber';
 export type Outcome = 'Scheduled' | 'Complete' | 'Ghosted' | 'Reject' | 'Role Closed' | 'Withdrew';
 export type Stage =
@@ -31,7 +31,7 @@ export const PRIORITIES: Priority[] = ['P0', 'P0.5', 'P1', 'P2'];
 export const STATUSES: AppStatus[] = ['Not Started', 'Active', 'Pending Response', 'Closed'];
 export const OUTCOMES: Outcome[] = ['Scheduled', 'Complete', 'Ghosted', 'Reject', 'Role Closed', 'Withdrew'];
 export const EVENT_TYPES: EventType[] = ['Scheduled', 'Completed', 'Rejected', 'Ghosted', 'Withdrew', 'Outreach', 'Note'];
-export const COMPANY_TYPES: CompanyType[] = ['Series A', 'Series B', 'Series C', 'Series D', 'Series E', 'Pre-IPO', 'Public'];
+export const COMPANY_TYPES: CompanyType[] = ['Series A', 'Series B', 'Series C', 'Series D', 'Series E', 'Pre-IPO', 'Public', 'Acquired'];
 export const INDUSTRIES: Industry[] = ['Bank', 'FinTech', 'Tech', 'Health Tech', 'SaaS', 'AI', 'RETech', 'MarTech', 'Payments', 'Crypto', 'Cyber'];
 
 export interface Application {
