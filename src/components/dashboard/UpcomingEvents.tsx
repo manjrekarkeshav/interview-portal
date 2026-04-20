@@ -15,7 +15,7 @@ export function UpcomingEvents() {
       return e.event_type === 'Scheduled' && d >= todayStart && d <= nextWeek;
     })
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-    .slice(0, 5)
+    .slice(0, 7)
     .map(e => {
       const app = applications.find(a => a.id === e.application_id);
       return { event: e, app };
