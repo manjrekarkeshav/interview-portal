@@ -67,10 +67,10 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
   };
 
   const getNextEvent = (app: Application) => {
-    const now = new Date();
+    const today = new Date().toISOString().slice(0, 10);
     const upcoming = events
-      .filter(e => e.application_id === app.id && e.event_type === 'Scheduled' && new Date(e.date) >= now)
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      .filter(e => e.application_id === app.id && e.event_type === 'Scheduled' && e.date >= today)
+      .sort((a, b) => a.date.localeCompare(b.date));
     return upcoming[0] || null;
   };
 
