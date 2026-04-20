@@ -133,7 +133,7 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
     sort.key === col ? (sort.dir === 'asc' ? <ChevronUp size={10} /> : <ChevronDown size={10} />) : null;
 
   const thClass = `text-left text-xs font-medium cursor-pointer select-none px-2 py-2 whitespace-nowrap ${darkMode ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'}`;
-  const tdClass = `px-2 py-1.5 text-xs`;
+  const tdClass = `px-2 py-1 text-xs whitespace-nowrap`;
 
   const toggleMulti = <T extends string>(arr: T[], val: T, setter: (v: T[]) => void) => {
     setter(arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]);
@@ -224,36 +224,15 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
     'Public': 'bg-green-100 text-green-700 border-green-200',
   };
 
-  const INDUSTRY_COLORS: Record<Industry, string> = {
-    'Bank': 'bg-slate-500/20 text-slate-300 border-slate-500/30',
-    'FinTech': 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-    'Tech': 'bg-sky-500/20 text-sky-300 border-sky-500/30',
-    'Health Tech': 'bg-rose-500/20 text-rose-300 border-rose-500/30',
-    'SaaS': 'bg-orange-500/20 text-orange-300 border-orange-500/30',
-    'AI': 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30',
-    'RETech': 'bg-lime-500/20 text-lime-300 border-lime-500/30',
-    'MarTech': 'bg-pink-500/20 text-pink-300 border-pink-500/30',
-    'Payments': 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-    'Crypto': 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
-  };
-
-  const INDUSTRY_COLORS_LIGHT: Record<Industry, string> = {
-    'Bank': 'bg-slate-100 text-slate-700 border-slate-200',
-    'FinTech': 'bg-blue-100 text-blue-700 border-blue-200',
-    'Tech': 'bg-sky-100 text-sky-700 border-sky-200',
-    'Health Tech': 'bg-rose-100 text-rose-700 border-rose-200',
-    'SaaS': 'bg-orange-100 text-orange-700 border-orange-200',
-    'AI': 'bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200',
-    'RETech': 'bg-lime-100 text-lime-700 border-lime-200',
-    'MarTech': 'bg-pink-100 text-pink-700 border-pink-200',
-    'Payments': 'bg-emerald-100 text-emerald-700 border-emerald-200',
-    'Crypto': 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  };
-
   const TypePill = ({ value, type }: { value: CompanyType | Industry; type: 'company' | 'industry' }) => {
-    const colorClass = type === 'company'
-      ? (darkMode ? COMPANY_TYPE_COLORS[value as CompanyType] : COMPANY_TYPE_COLORS_LIGHT[value as CompanyType])
-      : (darkMode ? INDUSTRY_COLORS[value as Industry] : INDUSTRY_COLORS_LIGHT[value as Industry]);
+    if (type === 'industry') {
+      return (
+        <span className={`text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+          {value}
+        </span>
+      );
+    }
+    const colorClass = darkMode ? COMPANY_TYPE_COLORS[value as CompanyType] : COMPANY_TYPE_COLORS_LIGHT[value as CompanyType];
     return (
       <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium border ${colorClass}`}>
         {value}
@@ -345,7 +324,7 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
                   return (
                     <tr
                       key={app.id}
-                      className={`border-b cursor-pointer transition-colors ${
+                      className={`border-b cursor-pointer transition-colors whitespace-nowrap ${
                         darkMode
                           ? 'border-gray-800 hover:bg-gray-800/50'
                           : 'border-gray-100 hover:bg-gray-50'
@@ -360,13 +339,13 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
                           updateApplication(app.id, { priority: next });
                         } : undefined} />
                       </td>
-                      <td className={tdClass}>
-                        <span className={`font-medium text-xs ${darkMode ? 'text-white' : 'text-gray-900'}`}>{app.company}</span>
+                      <td className={`${tdClass} max-w-[140px]`}>
+                        <span className={`font-medium text-xs truncate block ${darkMode ? 'text-white' : 'text-gray-900'}`}>{app.company}</span>
                         {app.referral_source && (
                           <span className={`ml-1 text-xs ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>↑{app.referral_source.split(' ')[0]}</span>
                         )}
                       </td>
-                      <td className={`${tdClass} hidden md:table-cell`} onClick={e => e.stopPropagation()}>
+                      <td className={`${tdClass} hidden md:table-cell max-w-[160px]`} onClick={e => e.stopPropagation()}>
                         {isAdmin && editingRole?.appId === app.id ? (
                           <input
                             ref={roleInputRef}
@@ -386,7 +365,7 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
                         ) : (
                           <span
                             onClick={isAdmin ? () => setEditingRole({ appId: app.id, value: app.role }) : undefined}
-                            className={`text-xs ${isAdmin ? 'cursor-text hover:underline decoration-dashed underline-offset-2' : ''} ${darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}
+                            className={`text-xs truncate block ${isAdmin ? 'cursor-text hover:underline decoration-dashed underline-offset-2' : ''} ${darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}
                           >
                             {app.role}
                           </span>
