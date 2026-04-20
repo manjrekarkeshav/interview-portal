@@ -24,6 +24,8 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
   const [priorities, setPriorities] = useState<Priority[]>([]);
   const [stages, setStages] = useState<Stage[]>([]);
   const [statuses, setStatuses] = useState<AppStatus[]>([]);
+  const [companyTypes, setCompanyTypes] = useState<CompanyType[]>([]);
+  const [industries, setIndustries] = useState<Industry[]>([]);
   const [showAll, setShowAll] = useState(false);
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({ key: 'priority', dir: 'asc' });
   const [openMenu, setOpenMenu] = useState<string | null>(null);
@@ -90,6 +92,12 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
     if (statuses.length > 0) {
       list = list.filter(a => statuses.includes(a.status));
     }
+    if (companyTypes.length > 0) {
+      list = list.filter(a => a.company_type && companyTypes.includes(a.company_type));
+    }
+    if (industries.length > 0) {
+      list = list.filter(a => a.industry && industries.includes(a.industry));
+    }
     if (search) {
       const q = search.toLowerCase();
       list = list.filter(a =>
@@ -123,7 +131,7 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
     });
 
     return list;
-  }, [applications, events, search, priorities, stages, statuses, showAll, filterStage, sort, activeOnly]);
+  }, [applications, events, search, priorities, stages, statuses, companyTypes, industries, showAll, filterStage, sort, activeOnly]);
 
   const toggleSort = (key: SortKey) => {
     setSort(s => s.key === key ? { key, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'desc' });
@@ -275,6 +283,12 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
             {PRIORITIES.map(p => <FilterChip key={p} val={p} selected={priorities.includes(p)} onClick={() => toggleMulti(priorities, p, setPriorities)} />)}
             <span className={`text-xs ml-2 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>Stage:</span>
             {STAGES.map(s => <FilterChip key={s} val={s} selected={stages.includes(s)} onClick={() => toggleMulti(stages, s, setStages)} />)}
+          </div>
+          <div className="flex items-center gap-1 flex-wrap">
+            <span className={`text-xs ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>Type:</span>
+            {COMPANY_TYPES.map(t => <FilterChip key={t} val={t} selected={companyTypes.includes(t)} onClick={() => toggleMulti(companyTypes, t, setCompanyTypes)} />)}
+            <span className={`text-xs ml-2 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>Industry:</span>
+            {INDUSTRIES.map(i => <FilterChip key={i} val={i} selected={industries.includes(i)} onClick={() => toggleMulti(industries, i, setIndustries)} />)}
           </div>
         </div>
       )}
