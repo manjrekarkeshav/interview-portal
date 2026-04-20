@@ -13,7 +13,7 @@ interface Props {
   activeOnly?: boolean;
 }
 
-type SortKey = 'company' | 'priority' | 'current_stage' | 'updated_at' | 'status' | 'outcome';
+type SortKey = 'company' | 'priority' | 'current_stage' | 'updated_at' | 'status' | 'outcome' | 'company_type' | 'industry';
 type SortDir = 'asc' | 'desc';
 
 export function ApplicationsTable({ filterStage, activeOnly }: Props) {
@@ -122,6 +122,12 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
       } else if (sort.key === 'outcome') {
         av = a.outcome ?? '';
         bv = b.outcome ?? '';
+      } else if (sort.key === 'company_type') {
+        av = a.company_type ?? '';
+        bv = b.company_type ?? '';
+      } else if (sort.key === 'industry') {
+        av = a.industry ?? '';
+        bv = b.industry ?? '';
       } else {
         av = a[sort.key] as string;
         bv = b[sort.key] as string;
@@ -305,8 +311,12 @@ export function ApplicationsTable({ filterStage, activeOnly }: Props) {
                   <span className="flex items-center gap-0.5">Company <SortIcon col="company" /></span>
                 </th>
                 <th className={`${thClass} hidden md:table-cell`}>Role</th>
-                <th className={`${thClass} hidden xl:table-cell`}>Type</th>
-                <th className={`${thClass} hidden xl:table-cell`}>Industry</th>
+                <th className={`${thClass} hidden xl:table-cell`} onClick={() => toggleSort('company_type')}>
+                  <span className="flex items-center gap-0.5">Type <SortIcon col="company_type" /></span>
+                </th>
+                <th className={`${thClass} hidden xl:table-cell`} onClick={() => toggleSort('industry')}>
+                  <span className="flex items-center gap-0.5">Industry <SortIcon col="industry" /></span>
+                </th>
                 <th className={`${thClass} hidden lg:table-cell`} onClick={() => toggleSort('current_stage')}>
                   <span className="flex items-center gap-0.5">Stage <SortIcon col="current_stage" /></span>
                 </th>
