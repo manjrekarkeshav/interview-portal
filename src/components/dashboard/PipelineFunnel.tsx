@@ -18,11 +18,7 @@ export function PipelineFunnel({ onStageClick }: Props) {
   const { applications, darkMode } = useStore();
 
   const stageCounts = STAGES.map(stage => {
-    const stageIdx = STAGES.indexOf(stage);
-    const apps = applications.filter(a => {
-      const appIdx = STAGES.indexOf(a.current_stage);
-      return appIdx >= stageIdx;
-    });
+    const apps = applications.filter(a => a.current_stage === stage);
 
     const byStatus: Record<AppStatus, number> = {
       'Active': 0,
