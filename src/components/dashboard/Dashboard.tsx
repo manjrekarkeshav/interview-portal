@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Upload, Activity, Clock, CalendarClock } from 'lucide-react';
+import { Plus, Upload, Activity, Clock, CalendarClock, Building2, Trophy } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { PipelineFunnel } from './PipelineFunnel';
 import { UpcomingEvents } from './UpcomingEvents';
@@ -17,6 +17,11 @@ export function Dashboard() {
   const activeCount = applications.filter(a => a.status !== 'Closed').length;
   const pendingResponseCount = applications.filter(a => a.status === 'Pending Response').length;
   const interviewsScheduledCount = applications.filter(a => a.outcome === 'Scheduled').length;
+  const totalCompanies = new Set(applications.map(a => a.company)).size;
+  const activeCompanies = new Set(
+    applications.filter(a => a.status === 'Active' || a.status === 'Pending Response').map(a => a.company)
+  ).size;
+  const totalOffers = applications.filter(a => a.current_stage === 'Offer' || a.current_stage === 'Sign-on').length;
 
   const handleCSVImport = () => {
     const input = document.createElement('input');
@@ -72,7 +77,7 @@ export function Dashboard() {
 
       <div className="grid grid-cols-3 gap-4">
         <div className="col-span-2 space-y-4">
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-5 gap-3">
             <div className={`rounded-xl p-4 border flex items-center justify-between ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
               <div>
                 <p className={`text-xs font-medium mb-1 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>Active Pipeline</p>
@@ -96,6 +101,22 @@ export function Dashboard() {
                 <p className={`text-xs mt-0.5 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>upcoming</p>
               </div>
               <CalendarClock size={18} className="text-emerald-400 shrink-0" />
+            </div>
+            <div className={`rounded-xl p-4 border flex items-center justify-between ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
+              <div>
+                <p className={`text-xs font-medium mb-1 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>Companies</p>
+                <p className={`text-2xl font-bold font-mono ${darkMode ? 'text-white' : 'text-gray-900'}`}>{totalCompanies}</p>
+                <p className={`text-xs mt-0.5 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>{activeCompanies} active</p>
+              </div>
+              <Building2 size={18} className="text-sky-400 shrink-0" />
+            </div>
+            <div className={`rounded-xl p-4 border flex items-center justify-between ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
+              <div>
+                <p className={`text-xs font-medium mb-1 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>Total Offers</p>
+                <p className={`text-2xl font-bold font-mono ${darkMode ? 'text-white' : 'text-gray-900'}`}>{totalOffers}</p>
+                <p className={`text-xs mt-0.5 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>offer / sign-on</p>
+              </div>
+              <Trophy size={18} className="text-yellow-400 shrink-0" />
             </div>
           </div>
           <PipelineFunnel onStageClick={(s) => setStageFilter(s)} />
