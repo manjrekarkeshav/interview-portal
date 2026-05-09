@@ -80,19 +80,19 @@ export function Dashboard() {
           <div className="grid grid-cols-5 gap-3">
             <div className={`rounded-xl p-4 border flex items-center justify-between ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
               <div>
+                <p className={`text-xs font-medium mb-1 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>Companies</p>
+                <p className={`text-2xl font-bold font-mono ${darkMode ? 'text-white' : 'text-gray-900'}`}>{totalCompanies}</p>
+                <p className={`text-xs mt-0.5 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>{activeCompanies} active</p>
+              </div>
+              <Building2 size={18} className="text-sky-400 shrink-0" />
+            </div>
+            <div className={`rounded-xl p-4 border flex items-center justify-between ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
+              <div>
                 <p className={`text-xs font-medium mb-1 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>Active Pipeline</p>
                 <p className={`text-2xl font-bold font-mono ${darkMode ? 'text-white' : 'text-gray-900'}`}>{activeCount}</p>
                 <p className={`text-xs mt-0.5 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>in flight</p>
               </div>
               <Activity size={18} className="text-blue-400 shrink-0" />
-            </div>
-            <div className={`rounded-xl p-4 border flex items-center justify-between ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
-              <div>
-                <p className={`text-xs font-medium mb-1 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>Pending Response</p>
-                <p className={`text-2xl font-bold font-mono ${darkMode ? 'text-white' : 'text-gray-900'}`}>{pendingResponseCount}</p>
-                <p className={`text-xs mt-0.5 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>awaiting reply</p>
-              </div>
-              <Clock size={18} className="text-amber-400 shrink-0" />
             </div>
             <div className={`rounded-xl p-4 border flex items-center justify-between ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
               <div>
@@ -104,19 +104,19 @@ export function Dashboard() {
             </div>
             <div className={`rounded-xl p-4 border flex items-center justify-between ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
               <div>
-                <p className={`text-xs font-medium mb-1 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>Companies</p>
-                <p className={`text-2xl font-bold font-mono ${darkMode ? 'text-white' : 'text-gray-900'}`}>{totalCompanies}</p>
-                <p className={`text-xs mt-0.5 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>{activeCompanies} active</p>
+                <p className={`text-xs font-medium mb-1 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>Pending Response</p>
+                <p className={`text-2xl font-bold font-mono ${darkMode ? 'text-white' : 'text-gray-900'}`}>{pendingResponseCount}</p>
+                <p className={`text-xs mt-0.5 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>awaiting reply</p>
               </div>
-              <Building2 size={18} className="text-sky-400 shrink-0" />
+              <Clock size={18} className="text-amber-400 shrink-0" />
             </div>
-            <div className={`rounded-xl p-4 border flex items-center justify-between ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
+            <div className={`rounded-xl p-4 border flex items-center justify-between ${darkMode ? 'bg-emerald-900/40 border-emerald-700/50' : 'bg-emerald-50 border-emerald-200'}`}>
               <div>
-                <p className={`text-xs font-medium mb-1 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>Total Offers</p>
-                <p className={`text-2xl font-bold font-mono ${darkMode ? 'text-white' : 'text-gray-900'}`}>{totalOffers}</p>
-                <p className={`text-xs mt-0.5 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>offer / sign-on</p>
+                <p className={`text-xs font-medium mb-1 ${darkMode ? 'text-emerald-400' : 'text-emerald-700'}`}>Total Offers</p>
+                <p className={`text-2xl font-bold font-mono ${darkMode ? 'text-emerald-300' : 'text-emerald-800'}`}>{totalOffers}</p>
+                <p className={`text-xs mt-0.5 ${darkMode ? 'text-emerald-600' : 'text-emerald-500'}`}>offer / sign-on</p>
               </div>
-              <Trophy size={18} className="text-yellow-400 shrink-0" />
+              <Trophy size={18} className="text-emerald-400 shrink-0" />
             </div>
           </div>
           <PipelineFunnel onStageClick={(s) => setStageFilter(s)} />
